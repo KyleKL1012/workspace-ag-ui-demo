@@ -1,0 +1,4 @@
+large_model: "gpt-4.1"
+mini_model: "gpt-4.1-mini"
+temperature: 0
+timeout: 20

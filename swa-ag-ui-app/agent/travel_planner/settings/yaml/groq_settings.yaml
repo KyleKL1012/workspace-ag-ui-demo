@@ -1,0 +1,4 @@
+large_model: "openai/gpt-oss-20b"
+mini_model: "openai/gpt-oss-20b"
+temperature: 0
+timeout: 20

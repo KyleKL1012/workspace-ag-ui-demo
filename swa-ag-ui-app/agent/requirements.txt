@@ -7,3 +7,13 @@ uvicorn>=0.29.0,<1.0.0
 python-dotenv>=1.0.0,<2.0.0
 langgraph-cli[inmem]==0.3.3
 langchain-openai>=0.0.1
+# Travel planner dependencies
+dill>=0.4.0
+jinja2>=3.1.6
+langchain-mcp-adapters>=0.1.9
+pydantic>=2.11.5
+python-dateutil>=2.9.0.post0
+types-pyyaml>=6.0.12.20250516
+langfuse>=2.60.0
+langchain-google-genai>=2.1.12
+langchain-groq>=0.3.8
