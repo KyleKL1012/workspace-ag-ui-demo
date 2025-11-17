@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useCoAgent, useCopilotAction, useLangGraphInterrupt } from "@copilotkit/react-core";
 import { CopilotKitCSSProperties, CopilotSidebar } from "@copilotkit/react-ui";
 
-// Agent 状态类型
 type AgentState = {
   proverbs: string[];
 };
@@ -12,7 +11,6 @@ type AgentState = {
 export default function CopilotKitPage() {
   const [themeColor, setThemeColor] = useState("#6366f1");
 
-  // 前端 Action：切换主题色
   useCopilotAction({
     name: "setThemeColor",
     parameters: [{ name: "themeColor", description: "The theme color to set.", required: true }],
@@ -30,7 +28,7 @@ export default function CopilotKitPage() {
         labels={{
           title: "Popup Assistant",
           initial:
-            ":wave: Hi, there! You're chatting with an agent. This agent comes with a few tools to get you started.\n\n" +
+            "👋 Hi, there! You're chatting with an agent. This agent comes with a few tools to get you started.\n\n" +
             "- **Frontend Tools**: \"Set the theme to orange\"\n" +
             "- **Shared State**: \"Write a proverb about AI\"\n" +
             "- **Generative UI**: \"Get the weather in SF\"\n\n" +
@@ -49,48 +47,49 @@ function YourMainContent({ themeColor }: { themeColor: string }) {
     },
   });
 
-const [weatherArgs, setWeatherArgs] = useState<{ location: string } | null>(null);
-useLangGraphInterrupt<{ action: string; message: string; location: string }>({
-  render: ({ event, resolve }) => {
-    if (event.value.action !== "confirm_weather_request") return "";
+  const [weatherLocation, setWeatherLocation] = useState<string | null>(null);
+  const [showWeather, setShowWeather] = useState(false);
 
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl p-6 shadow-lg text-center">
-          <p className="text-lg mb-4">{event.value.message}</p>
-          <div className="flex justify-center gap-4">
-            <button onClick={() => {resolve("approved"); setWeatherArgs({ location: event.value.location })}} className="bg-green-500 text-white px-4 py-2 rounded-lg">允许</button>
-            <button onClick={() => resolve("rejected")} className="bg-red-500 text-white px-4 py-2 rounded-lg">拒绝</button>
+  useLangGraphInterrupt<{ action: string; message: string; location: string }>({
+    render: ({ event, resolve }) => {
+      if (event.value.action !== "confirm_weather_request") return <></>;
+
+      return (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 shadow-lg text-center">
+            <p className="text-lg mb-4">{event.value.message}</p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => {
+                  setWeatherLocation(event.value.location);
+                  setShowWeather(true);
+                  resolve("approved");
+                }}
+                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => {
+                  setShowWeather(false);
+                  resolve("rejected");
+                }}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+              >
+                Reject
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    );
-  },
-});
+      );
+    },
+  });
 
-  // :small_blue_diamond: 前端 Action：添加谚语
   useCopilotAction({
     name: "addProverb",
     parameters: [{ name: "proverb", description: "The proverb to add", required: true }],
     handler: ({ proverb }) => setState({ ...state, proverbs: [...state.proverbs, proverb] }),
   });
-
-
-
-useCopilotAction({
-  name: "get_weather",
-  description: "Get the weather for a given location.",
-  parameters: [{ name: "location", type: "string", required: true }],
-  handler: ({ location }) => {
-    // handler 不返回真正数据，交给后台处理
-    return { location };
-  },
-  render: ({ args }) => {
-    if (!weatherArgs) return "";
-    return <WeatherCard location={args.location} themeColor={themeColor} />;
-  },
-});
-
 
   return (
     <div
@@ -100,9 +99,15 @@ useCopilotAction({
       <div className="bg-white/20 backdrop-blur-md p-8 rounded-2xl shadow-xl max-w-2xl w-full">
         <h1 className="text-4xl font-bold text-white mb-2 text-center">Proverbs</h1>
         <p className="text-gray-200 text-center italic mb-6">
-          This is a demonstrative page, but it could be anything you want! :kite:
+          This is a demonstrative page, but it could be anything you want! 🪁
         </p>
+
+        {showWeather && weatherLocation && (
+          <WeatherCard location={weatherLocation} themeColor={themeColor} />
+        )}
+
         <hr className="border-white/20 my-6" />
+        
         <div className="flex flex-col gap-3">
           {state.proverbs?.map((proverb, index) => (
             <div
@@ -124,6 +129,7 @@ useCopilotAction({
             </div>
           ))}
         </div>
+
         {state.proverbs?.length === 0 && (
           <p className="text-center text-white/80 italic my-8">
             No proverbs yet. Ask the assistant to add some!
@@ -134,7 +140,6 @@ useCopilotAction({
   );
 }
 
-// WeatherCard 和 SunIcon 组件保持原样
 function SunIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-14 h-14 text-yellow-200">
