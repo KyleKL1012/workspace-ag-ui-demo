@@ -50,38 +50,68 @@ function YourMainContent({ themeColor }: { themeColor: string }) {
   const [weatherLocation, setWeatherLocation] = useState<string | null>(null);
   const [showWeather, setShowWeather] = useState(false);
 
-  useLangGraphInterrupt<{ action: string; message: string; location: string }>({
+  useLangGraphInterrupt<{ action: string; message: string; location?: string; task_id?: string }>({
     render: ({ event, resolve }) => {
-      if (event.value.action !== "confirm_weather_request") return <></>;
-
-      return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 shadow-lg text-center">
-            <p className="text-lg mb-4">{event.value.message}</p>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={() => {
-                  setWeatherLocation(event.value.location);
-                  setShowWeather(true);
-                  resolve("approved");
-                }}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-              >
-                Approve
-              </button>
-              <button
-                onClick={() => {
-                  setShowWeather(false);
-                  resolve("rejected");
-                }}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-              >
-                Reject
-              </button>
+      // Handle weather approval
+      if (event.value.action === "confirm_weather_request") {
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 shadow-lg text-center">
+              <p className="text-lg mb-4">{event.value.message}</p>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={() => {
+                    setWeatherLocation(event.value.location || null);
+                    setShowWeather(true);
+                    resolve("approved");
+                  }}
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                >
+                  Approve
+                </button>
+                <button
+                  onClick={() => {
+                    setShowWeather(false);
+                    resolve("rejected");
+                  }}
+                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                >
+                  Reject
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      );
+        );
+      }
+
+      // Handle HR agent approval
+      if (event.value.action === "hr_agent_approval") {
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 shadow-lg max-w-md">
+              <h3 className="text-xl font-bold mb-4 text-gray-800">HR Agent Approval Required</h3>
+              <p className="text-gray-700 mb-6 whitespace-pre-wrap">{event.value.message}</p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => resolve("rejected")}
+                  className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  Reject
+                </button>
+                <button
+                  onClick={() => resolve("approved")}
+                  className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Approve
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // Unknown action - don't render anything
+      return <></>;
     },
   });
 
